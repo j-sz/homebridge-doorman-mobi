@@ -38,11 +38,12 @@ function createApi() {
   return { hap: { Service: { LockMechanism }, Characteristic: characteristics } };
 }
 
-function response(status, body) {
+function response(status, body, headers = {}) {
   return {
     status,
     ok: status >= 200 && status < 300,
     json: async () => body,
+    headers,
   };
 }
 
@@ -58,6 +59,26 @@ function createAccessory(config = {}) {
     createApi()
   );
 }
+
+test("registers the accessory with the names declared in package metadata", () => {
+  let registration;
+  const api = {
+    registerAccessory(pluginName, accessoryName) {
+      registration = { pluginName, accessoryName };
+    },
+  };
+  const packageJson = require("../package.json");
+  const metadata = packageJson.homebridge;
+
+  require("../index.js")(api);
+
+  assert.match(packageJson.name, /^homebridge-[\w-]+$/);
+  assert.equal(metadata.pluginIdentifier, packageJson.name);
+  assert.deepEqual(registration, {
+    pluginName: metadata.pluginIdentifier,
+    accessoryName: metadata.accessory,
+  });
+});
 
 test("reads a buzzer status as a secured HomeKit lock", async () => {
   const originalFetch = global.fetch;
@@ -111,6 +132,35 @@ test("logs in again once after an unauthorized API response", async () => {
     assert.equal(await accessory.getLockState(), 0);
     assert.equal(calls[1][0], "https://doorman.example/api/auth/login");
     assert.equal(calls[2][1].headers.Authorization, "Bearer fresh-token");
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
+test("uses the session cookie returned by email login", async () => {
+  const originalFetch = global.fetch;
+  const calls = [];
+  global.fetch = async (url, options) => {
+    calls.push([url, options]);
+    if (calls.length === 1) return response(401, { error: "Session required" });
+    if (url.endsWith("/auth/login")) {
+      return response(
+        200,
+        { user: { id: 1 } },
+        { getSetCookie: () => ["session=fresh-session; Path=/; HttpOnly"] }
+      );
+    }
+    return response(200, [{ id: 7, record_type: "buzzer", status: "locked" }]);
+  };
+
+  try {
+    const accessory = createAccessory({
+      accessToken: undefined,
+      email: "door@example.com",
+      password: "secret",
+    });
+    assert.equal(await accessory.getLockState(), 1);
+    assert.equal(calls[2][1].headers.Cookie, "session=fresh-session");
   } finally {
     global.fetch = originalFetch;
   }

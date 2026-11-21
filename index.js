@@ -1,6 +1,6 @@
 "use strict";
 
-const PLUGIN_NAME = "homebridge-doorman";
+const PLUGIN_NAME = "homebridge-doorman-mobi";
 const ACCESSORY_NAME = "Doorman";
 
 class DoormanAccessory {
@@ -13,6 +13,7 @@ class DoormanAccessory {
     this.apiUrl = typeof config.apiUrl === "string" ? config.apiUrl.replace(/\/+$/, "") : "";
     this.doorId = Number(config.doorId);
     this.accessToken = config.accessToken;
+    this.sessionCookie = undefined;
 
     if (!this.apiUrl) {
       throw new Error("The apiUrl setting is required.");
@@ -86,6 +87,7 @@ class DoormanAccessory {
       headers: {
         "Content-Type": "application/json",
         ...(this.accessToken ? { Authorization: `Bearer ${this.accessToken}` } : {}),
+        ...(this.sessionCookie ? { Cookie: this.sessionCookie } : {}),
         ...options.headers,
       },
     });
@@ -104,16 +106,32 @@ class DoormanAccessory {
   }
 
   async login() {
+    this.accessToken = undefined;
+    this.sessionCookie = undefined;
     const response = await fetch(`${this.apiUrl}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: this.config.email, password: this.config.password }),
     });
     const body = await response.json().catch(() => ({}));
-    if (!response.ok || typeof body.token !== "string") {
+    if (!response.ok) {
       throw new Error(body.error || `Doorman login failed with status ${response.status}.`);
     }
-    this.accessToken = body.token;
+    if (typeof body.token === "string" && body.token) {
+      this.accessToken = body.token;
+      return;
+    }
+
+    const cookieHeaders =
+      typeof response.headers?.getSetCookie === "function"
+        ? response.headers.getSetCookie()
+        : [response.headers?.get?.("set-cookie")].filter(Boolean);
+    this.sessionCookie = cookieHeaders
+      .map((cookie) => cookie.split(";")[0].trim())
+      .find((cookie) => /^session=/i.test(cookie));
+    if (!this.sessionCookie) {
+      throw new Error(body.error || "Doorman login response did not include a session.");
+    }
   }
 
   toHomeKitState(status) {
