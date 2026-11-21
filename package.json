@@ -1,5 +1,5 @@
 {
-  "name": "homebridge-doorman.mobi",
+  "name": "homebridge-doorman-mobi",
   "version": "1.0.0",
   "description": "Homebridge accessory for buzzers controlled by doorman.mobi",
   "main": "index.js",
@@ -13,16 +13,16 @@
     "homebridge": ">=1.6.0"
   },
   "homebridge": {
-    "pluginIdentifier": "homebridge-doorman.mobi",
+    "pluginIdentifier": "homebridge-doorman-mobi",
     "pluginAlias": "doorman.mobi",
-    "accessory": "Buzzer",
+    "accessory": "Doorman",
     "schema": {
       "type": "object",
       "properties": {
         "name": {
           "title": "Accessory name",
           "type": "string",
-          "default": "Buzzer"
+          "default": "Doorman"
         },
         "apiUrl": {
           "title": "doorman.mobi API URL",

@@ -1,4 +1,4 @@
-# homebridge-doorman.mobi
+# homebridge-doorman-mobi
 
 Allows control of buzzers from `doorman.mobi` as a HomeKit lock. Locking and unlocking updates the app through its authenticated API.
 
@@ -6,7 +6,7 @@ Install the plugin with Homebridge, then add an accessory:
 
 ```json
 {
-  "accessory": "Buzzer",
+  "accessory": "Doorman",
   "name": "Lobby Door",
   "apiUrl": "https://doorman.mobi/api",
   "doorId": 1,
@@ -21,7 +21,7 @@ Alternatively, configure `accessToken` instead of `email` and `password`:
 
 ```json
 {
-  "accessory": "Buzzer",
+  "accessory": "Doorman",
   "name": "Lobby Door",
   "apiUrl": "https://doorman.mobi/api",
   "doorId": 1,
