@@ -27,7 +27,7 @@
         "apiUrl": {
           "title": "doorman.mobi API URL",
           "type": "string",
-          "description": "The doorman.mobi API base URL, such as https://szpala.com/api."
+          "description": "The doorman.mobi API base URL, such as https://doorman.mobi/api."
         },
         "doorId": {
           "title": "Buzzer asset ID",

@@ -6,7 +6,7 @@ Install the plugin with Homebridge, then add an accessory:
 
 ```json
 {
-  "accessory": "doorman.mobi",
+  "accessory": "Buzzer",
   "name": "Lobby Door",
   "apiUrl": "https://doorman.mobi/api",
   "doorId": 1,
@@ -21,7 +21,7 @@ Alternatively, configure `accessToken` instead of `email` and `password`:
 
 ```json
 {
-  "accessory": "doorman.mobi",
+  "accessory": "Buzzer",
   "name": "Lobby Door",
   "apiUrl": "https://doorman.mobi/api",
   "doorId": 1,

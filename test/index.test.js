@@ -59,6 +59,23 @@ function createAccessory(config = {}) {
   );
 }
 
+test("registers the accessory with the names declared in package metadata", () => {
+  let registration;
+  const api = {
+    registerAccessory(pluginName, accessoryName) {
+      registration = { pluginName, accessoryName };
+    },
+  };
+  const metadata = require("../package.json").homebridge;
+
+  require("../index.js")(api);
+
+  assert.deepEqual(registration, {
+    pluginName: metadata.pluginIdentifier,
+    accessoryName: metadata.accessory,
+  });
+});
+
 test("reads a buzzer status as a secured HomeKit lock", async () => {
   const originalFetch = global.fetch;
   global.fetch = async (url, options) => {

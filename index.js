@@ -1,7 +1,7 @@
 "use strict";
 
-const PLUGIN_NAME = "homebridge-doorman";
-const ACCESSORY_NAME = "Doorman";
+const PLUGIN_NAME = "homebridge-doorman.mobi";
+const ACCESSORY_NAME = "Buzzer";
 
 class DoormanAccessory {
   constructor(log, config, api) {
